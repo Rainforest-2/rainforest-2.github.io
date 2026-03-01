@@ -3,36 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Original Mini TD Prototype</title>
+    <title>Battle Cats Style TD Rebuild</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <main class="layout">
       <header class="hud">
-        <h1>Original Mini TD Prototype</h1>
+        <h1>Battle Cats Style TD Rebuild</h1>
         <div class="hud-row">
           <div class="gauge-wrap" aria-label="money gauge">
             <label for="moneyGauge">Money</label>
-            <progress id="moneyGauge" max="300" value="100"></progress>
-            <span id="moneyValue">100 / 300</span>
+            <progress id="moneyGauge" max="1200" value="120"></progress>
+            <span id="moneyValue">120 / 1200</span>
+          </div>
+          <div class="battle-metrics">
+            <span>味方城HP: <strong id="allyCastleHp">1800</strong></span>
+            <span>敵城HP: <strong id="enemyCastleHp">1800</strong></span>
+            <span>経過: <strong id="stageTime">0.0</strong>s</span>
           </div>
           <div class="control-wrap">
-            <button id="startButton" type="button">Start Stage</button>
-            <button id="spawnButton" type="button">Deploy Unit (50)</button>
+            <button id="startButton" type="button">Restart Stage</button>
+            <button id="spawnButton" type="button">Deploy Cat (50)</button>
           </div>
         </div>
       </header>
 
       <section class="battle-area">
         <canvas id="gameCanvas" width="960" height="360" aria-label="game canvas"></canvas>
-        <p id="statusText" class="status-text">Press "Start Stage" to begin.</p>
+        <p id="statusText" class="status-text">初期化中...</p>
       </section>
     </main>
 
-    <script src="js/engine/timeline.js"></script>
-    <script src="js/engine/renderer.js"></script>
-    <script src="js/engine/input.js"></script>
-    <script src="js/engine/physics.js"></script>
-    <script src="js/main.js"></script>
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>
