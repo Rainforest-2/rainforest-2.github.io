@@ -2,40 +2,32 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>にゃんこ風バトルエンジン</title>
-    <!-- ルートに置いたスタイルを読み込む（要件の構成に準拠） -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>にゃんこ風モバイルバトル</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main class="game-shell">
-      <header class="hud">
-        <h1>Battle Engine Rebuild (30FPS / Frame Logic)</h1>
-        <div class="hud-row">
-          <div class="money-panel">
-            <p>所持金 <span id="moneyText">0 / 0</span></p>
-            <progress id="moneyBar" value="0" max="1"></progress>
-          </div>
-          <div class="base-panel">
-            <p>敵城HP: <strong id="enemyBaseHp">0</strong></p>
-            <p>味方城HP: <strong id="playerBaseHp">0</strong></p>
-            <p>財布Lv: <strong id="walletLevel">1</strong></p>
-            <p>経過F: <strong id="frameCounter">0</strong></p>
-          </div>
-          <div class="control-panel">
-            <button id="startButton" type="button">ステージ開始</button>
-            <button id="walletButton" type="button">財布レベルUP</button>
-          </div>
-        </div>
-      </header>
+    <main id="app">
+      <canvas id="gameCanvas" aria-label="にゃんこ風バトル"></canvas>
 
-      <section class="canvas-wrap">
-        <!-- メイン描画。camera.applyTransform でワールド描画を統一 -->
-        <canvas id="gameCanvas" width="1280" height="720" aria-label="にゃんこ風バトル"></canvas>
-        <p id="statusText">準備完了</p>
+      <section id="hudTop" class="hud-top">
+        <div class="stage-label">長崎県</div>
+        <div class="money-label" id="moneyText">0 / 0円</div>
       </section>
 
-      <section class="unit-bar" id="unitBar" aria-label="ユニットスロット"></section>
+      <section id="uiBar" class="ui-bar" aria-label="モバイル操作UI">
+        <button id="walletBtn" class="round-btn wallet-btn" type="button" aria-label="働きネコレベルアップ">
+          <span class="title">LEVEL</span>
+          <span class="value" id="walletLevel">1</span>
+        </button>
+
+        <div id="slotScroller" class="slot-scroller" aria-label="生産スロット"></div>
+
+        <button id="cannonBtn" class="round-btn cannon-btn" type="button" aria-label="にゃんこ砲">
+          <span class="title">砲</span>
+          <span class="value" id="cannonState">0%</span>
+        </button>
+      </section>
     </main>
 
     <script type="module" src="js/main.js"></script>
