@@ -1,0 +1,24 @@
+{
+  "cat_basic": {
+    "id": "cat_basic",
+    "name": "Basic Cat",
+    "hp": 100,
+    "atk": 20,
+    "range": 40,
+    "speed": 1.2,
+    "cooldown": 1.2,
+    "cost": 50,
+    "sprite": "ally_cat.svg"
+  },
+  "enemy_basic": {
+    "id": "enemy_basic",
+    "name": "Basic Blob",
+    "hp": 110,
+    "atk": 15,
+    "range": 40,
+    "speed": 1.05,
+    "cooldown": 1.4,
+    "cost": 0,
+    "sprite": "enemy_blob.svg"
+  }
+}
