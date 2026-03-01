@@ -1,0 +1,14 @@
+[
+  {
+    "name": "日本編1章 1ステージ（再構築）",
+    "base_hp_enemy": 3000,
+    "base_hp_player": 3000,
+    "waves": [
+      { "time": 90, "enemy": "doge", "count": 1 },
+      { "time": 160, "enemy": "snache", "count": 2 },
+      { "time": 220, "enemy": "doge", "count": 2 },
+      { "time": 340, "enemy": "snache", "count": 3 },
+      { "time": 500, "enemy": "boss", "count": 1 }
+    ]
+  }
+]

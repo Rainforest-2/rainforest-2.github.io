@@ -1,0 +1,33 @@
+{
+  "doge": {
+    "name": "わんこ",
+    "hp": 210,
+    "range": 90,
+    "speed": 4,
+    "atk_power": 24,
+    "attack_state": { "pre": 8, "hit": 14, "total": 26 },
+    "kb_count": 2,
+    "attributes": { "red": 1.0, "floating": 1.0, "black": 1.0 }
+  },
+  "snache": {
+    "name": "にょろ",
+    "hp": 160,
+    "range": 70,
+    "speed": 5,
+    "atk_power": 16,
+    "attack_state": { "pre": 6, "hit": 10, "total": 20 },
+    "kb_count": 1,
+    "attributes": { "red": 1.0, "floating": 1.0, "black": 1.0 }
+  },
+  "boss": {
+    "name": "ぶんぶん先生",
+    "hp": 8600,
+    "range": 260,
+    "speed": 7,
+    "atk_power": 450,
+    "attack_state": { "pre": 12, "hit": 24, "total": 40 },
+    "kb_count": 5,
+    "is_boss": true,
+    "attributes": { "red": 1.0, "floating": 1.0, "black": 1.0 }
+  }
+}

@@ -1,73 +1,75 @@
-# Original Mini TD Prototype (HTML/CSS/JS Only)
+# にゃんこ風バトルエンジン再設計仕様書
 
-ローカルのみで動作する、2Dタワーディフェンスの**下準備＋最小プロトタイプ**です。
-著作権への配慮として、素材・命名・ゲーム内容はすべてオリジナルの仮実装です。
+## 概要
+このリファクタは、既存の最小試作を **30FPS固定・フレーム基準ロジック** のバトルエンジンへ再構築したものです。
+HTML/CSS/ES6 + Canvas2D のみで動作し、外部ライブラリは使用していません。
 
-## 実行方法
+## 主要改修ログ
 
-1. このリポジトリをローカルに配置する。
-2. `index.html` をブラウザで直接開く。
-3. `Start Stage` で開始し、`Deploy Unit` で味方を出撃する。
+### 1. 侵攻方向の統一
+- 敵城を左、味方城を右へ固定。
+- 味方ユニットは右→左（`direction = -1`）、敵ユニットは左→右（`direction = 1`）。
+- 射程判定線は方向に応じて正負を反転。
 
-> 補足: 一部ブラウザ設定では `fetch()` による JSON 読み込みが `file://` で制限される場合があります。
-> その場合はローカル HTTP サーバー（例: `python -m http.server`）を使ってください。
+### 2. Camera システム導入
+- `js/engine/camera.js` に Camera クラスを新設。
+- 横スクロール（←→、ドラッグ）、ズーム（ホイール）に対応。
+- 3層パララックス背景を `camera.x / factor` で描画。
+- 左右境界で移動制限。
 
-## ディレクトリ構造
+### 3. バトルロジックをフレーム管理へ統一
+- `Unit` は `move / attack / knockback` 状態機械を持つ。
+- 攻撃は `pre / hit / total` フレームで管理。
+- hit判定は1回のみ、対象死亡後もモーション継続。
+- KB は `maxHp / kbCount` ごとの閾値で発生。
+
+### 4. 当たり判定の再実装
+- 矩形衝突を排除。
+- 中心X + 射程でライン判定（にゃんこ方式）。
+
+### 5. stage.json 駆動の wave 管理
+- `time(F)` 到達で敵を出現。
+- 敵全滅/敵城破壊で勝利、味方城HP0で敗北。
+
+### 6. 所持金と財布レベル
+- 1Fごとに `money += incomeSpeed`。
+- 財布レベルUPで `walletMax` と `incomeSpeed` を強化。
+- ユニットスロットはコスト不足・再生産中を反映。
+
+### 7. UI/UX
+- 下部8スロット構成。
+- hoverでユニット詳細。
+- クールタイムを扇形オーバーレイ描画。
+- 墨絵風に寄せた太線・抑彩度描画。
+
+## ディレクトリ構成
 
 ```text
-project/
- ├ index.html
- ├ css/
- │   └ style.css
- ├ js/
- │   ├ main.js
- │   └ engine/
- │       ├ renderer.js
- │       ├ physics.js
- │       ├ timeline.js
- │       └ input.js
- ├ assets/
- │   ├ images/
- │   ├ sounds/
- │   └ data/
- └ README.md
+/
+├ index.html
+├ style.css
+├ /js
+│   ├ main.js
+│   └ /engine
+│       ├ core.js
+│       ├ camera.js
+│       ├ unit.js
+│       ├ enemy.js
+│       ├ stage.js
+│       ├ animation.js
+│       ├ collision.js
+│       └ loader.js
+├ /data
+│   ├ units.json
+│   ├ enemies.json
+│   └ stages.json
+└ /assets
+    ├ /sprites
+    └ /bg
 ```
 
-## ファイル役割
+## 実行方法
+1. ルートで HTTP サーバーを起動（例: `python -m http.server 8000`）。
+2. ブラウザで `http://localhost:8000` を開く。
+3. ステージ開始、ユニット出撃、財布レベルUPを試す。
 
-- `index.html`
-  - キャンバス、所持金ゲージ、出撃ボタン、開始ボタン、ステータス表示を提供。
-- `css/style.css`
-  - HUD とキャンバスを見やすく配置するための最小スタイル。
-- `js/engine/timeline.js`
-  - 固定 FPS 更新の `GameLoop`。
-- `js/engine/renderer.js`
-  - `Renderer`、`Sprite`、`ResourceLoader` を提供。
-- `js/engine/physics.js`
-  - 射程判定・ターゲット探索の `Collision`。
-- `js/engine/input.js`
-  - UI ボタン入力をゲーム処理へ接続。
-- `js/main.js`
-  - `Entity` と `BattleField`、戦闘の最小ロジック本体。
-- `assets/data/units.json`
-  - 味方・敵の共通ステータス定義（JSONテンプレート）。
-- `assets/images/*.svg`
-  - 仮キャラ・背景・ヒット演出のプレースホルダー素材。
-
-## 実装済みの最小プロトタイプ要素
-
-- 背景描画
-- 味方1種の出撃
-- 敵1種の定期出現
-- 接近時の自動戦闘（射程判定、ダメージ、簡易ノックバック）
-- 同一レーン管理
-- お金自動増加
-- 仮の勝利/敗北条件（基地HP）
-
-## 拡張予定
-
-- 複数ユニットと進化段階
-- 演出強化（ヒットエフェクト、攻撃モーション、SE/BGM）
-- ステージデータ駆動化（難易度、ウェーブ設定）
-- UI 改善（クールダウン表示、編成スロット）
-- セーブデータ（ローカルストレージ）
