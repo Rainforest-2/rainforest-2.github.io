@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Original Mini TD Prototype</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <header class="hud">
+        <h1>Original Mini TD Prototype</h1>
+        <div class="hud-row">
+          <div class="gauge-wrap" aria-label="money gauge">
+            <label for="moneyGauge">Money</label>
+            <progress id="moneyGauge" max="300" value="100"></progress>
+            <span id="moneyValue">100 / 300</span>
+          </div>
+          <div class="control-wrap">
+            <button id="startButton" type="button">Start Stage</button>
+            <button id="spawnButton" type="button">Deploy Unit (50)</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="battle-area">
+        <canvas id="gameCanvas" width="960" height="360" aria-label="game canvas"></canvas>
+        <p id="statusText" class="status-text">Press "Start Stage" to begin.</p>
+      </section>
+    </main>
+
+    <script src="js/engine/timeline.js"></script>
+    <script src="js/engine/renderer.js"></script>
+    <script src="js/engine/input.js"></script>
+    <script src="js/engine/physics.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

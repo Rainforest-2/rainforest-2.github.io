@@ -1,0 +1,99 @@
+/* Basic page styling for an app-like centered layout. */
+:root {
+  --bg: #111827;
+  --card: #1f2937;
+  --ink: #f9fafb;
+  --accent: #22c55e;
+  --danger: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at top, #1f2b45, #0b1020 60%);
+  min-height: 100vh;
+}
+
+.layout {
+  width: min(1000px, 95vw);
+  margin: 1rem auto;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--card) 92%, black);
+  border-radius: 16px;
+  border: 1px solid #374151;
+}
+
+.hud h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.2rem;
+}
+
+.hud-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.gauge-wrap {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 320px;
+}
+
+progress {
+  width: 100%;
+  height: 1rem;
+}
+
+.control-wrap {
+  display: flex;
+  gap: 0.5rem;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.battle-area {
+  margin-top: 1rem;
+}
+
+#gameCanvas {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #4b5563;
+  background: #9ad8ff;
+}
+
+.status-text {
+  margin: 0.6rem 0 0;
+  color: #d1d5db;
+}
+
+.status-text.win {
+  color: var(--accent);
+}
+
+.status-text.lose {
+  color: var(--danger);
+}
