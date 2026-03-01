@@ -1,0 +1,44 @@
+{
+  "defaultStage": {
+    "id": "defaultStage",
+    "name": "Long Plains",
+    "width": 4200,
+    "groundY": 300,
+    "allyCastleX": 120,
+    "enemyCastleX": 4080,
+    "allySpawnX": 200,
+    "enemySpawnX": 3980,
+    "castleHp": 1800,
+    "initialMoney": 120,
+    "maxMoney": 1200,
+    "moneyRate": 20,
+    "waves": [
+      {
+        "at": 2,
+        "spawns": [
+          { "enemyId": "enemy_blob", "count": 4, "intervalMin": 0.8, "intervalMax": 1.2, "delay": 0 }
+        ]
+      },
+      {
+        "at": 12,
+        "spawns": [
+          { "enemyId": "enemy_blob", "count": 6, "intervalMin": 0.6, "intervalMax": 1.1, "delay": 0.2 },
+          { "enemyId": "enemy_sniper", "count": 2, "intervalMin": 1.8, "intervalMax": 2.4, "delay": 1.4 }
+        ]
+      },
+      {
+        "at": 25,
+        "spawns": [
+          { "enemyId": "enemy_sniper", "count": 5, "intervalMin": 1.2, "intervalMax": 2.1, "delay": 0 }
+        ]
+      },
+      {
+        "at": 40,
+        "spawns": [
+          { "enemyId": "enemy_boss", "count": 1, "intervalMin": 1, "intervalMax": 1, "delay": 0 },
+          { "enemyId": "enemy_blob", "count": 8, "intervalMin": 0.4, "intervalMax": 1.2, "delay": 0.5 }
+        ]
+      }
+    ]
+  }
+}

@@ -2,23 +2,33 @@
   "cat_basic": {
     "id": "cat_basic",
     "name": "Basic Cat",
-    "hp": 100,
-    "atk": 20,
-    "range": 40,
-    "speed": 1.2,
-    "cooldown": 1.2,
+    "hp": 120,
+    "attackPower": 25,
+    "attackToCastle": 20,
+    "range": 42,
+    "moveSpeed": 78,
+    "attackInterval": 1.3,
+    "attackWindup": 0.28,
+    "knockbackCount": 2,
+    "knockbackDistance": 58,
+    "knockbackDuration": 0.22,
     "cost": 50,
-    "sprite": "ally_cat.svg"
+    "size": { "w": 60, "h": 60 }
   },
-  "enemy_basic": {
-    "id": "enemy_basic",
-    "name": "Basic Blob",
-    "hp": 110,
-    "atk": 15,
-    "range": 40,
-    "speed": 1.05,
-    "cooldown": 1.4,
-    "cost": 0,
-    "sprite": "enemy_blob.svg"
+  "cat_midrange": {
+    "id": "cat_midrange",
+    "name": "Mid Ranger Cat",
+    "hp": 90,
+    "attackPower": 32,
+    "attackToCastle": 25,
+    "range": 160,
+    "moveSpeed": 62,
+    "attackInterval": 1.9,
+    "attackWindup": 0.42,
+    "knockbackCount": 2,
+    "knockbackDistance": 64,
+    "knockbackDuration": 0.25,
+    "cost": 90,
+    "size": { "w": 64, "h": 64 }
   }
 }

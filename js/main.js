@@ -1,285 +1,173 @@
-/**
- * Entity is the base class for ally/enemy units.
- * It contains stats, lane position, move/attack states, and hit handling.
- */
-class Entity {
-  constructor(config) {
-    this.id = config.id;
-    this.name = config.name;
-    this.team = config.team;
-    this.maxHp = config.hp;
-    this.hp = config.hp;
-    this.atk = config.atk;
-    this.range = config.range;
-    this.speed = config.speed;
-    this.cooldown = config.cooldown;
-    this.cost = config.cost || 0;
-    this.sprite = config.sprite;
-    this.width = 56;
-    this.height = 56;
-    this.x = config.x;
-    this.lane = config.lane;
-    this.y = 0;
+import { Camera } from './core/camera.js';
+import { StageManager } from './systems/stage-manager.js';
 
-    this.cooldownTimer = 0;
-    this.state = 'move';
-    this.alive = true;
-    this.knockbackTimer = 0;
-    this.knockbackPower = 0;
-  }
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
-  /**
-   * Update movement and cooldown.
-   */
-  update(dt, target) {
-    this.cooldownTimer = Math.max(0, this.cooldownTimer - dt);
+const startButton = document.getElementById('startButton');
+const spawnButton = document.getElementById('spawnButton');
+const statusText = document.getElementById('statusText');
+const moneyGauge = document.getElementById('moneyGauge');
+const moneyValue = document.getElementById('moneyValue');
+const allyCastleText = document.getElementById('allyCastleHp');
+const enemyCastleText = document.getElementById('enemyCastleHp');
+const stageTimeText = document.getElementById('stageTime');
 
-    if (this.knockbackTimer > 0) {
-      this.knockbackTimer -= dt;
-      this.x += this.knockbackPower * dt;
-      return;
-    }
+const keyState = { left: false, right: false };
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') keyState.left = true;
+  if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') keyState.right = true;
+});
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') keyState.left = false;
+  if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') keyState.right = false;
+});
 
-    if (!target) {
-      this.state = 'move';
-      const direction = this.team === 'player' ? 1 : -1;
-      this.x += direction * this.speed * 60 * dt;
-      return;
-    }
-
-    const inRange = Collision.inRange(this, target);
-    if (inRange) {
-      this.state = 'attack';
-    } else {
-      this.state = 'move';
-      const direction = this.team === 'player' ? 1 : -1;
-      this.x += direction * this.speed * 60 * dt;
-    }
-  }
-
-  canAttack() {
-    return this.cooldownTimer <= 0;
-  }
-
-  attack(target) {
-    if (!this.canAttack()) return;
-    this.cooldownTimer = this.cooldown;
-    target.takeDamage(this.atk, this.team === 'player' ? 22 : -22);
-  }
-
-  takeDamage(amount, knockbackPower) {
-    this.hp -= amount;
-    this.knockbackPower = knockbackPower;
-    this.knockbackTimer = 0.12;
-    if (this.hp <= 0) {
-      this.alive = false;
-    }
-  }
+function buildDefaultAnimations(theme) {
+  return {
+    walk: { frames: 4, frameDuration: 0.12, loop: true, palette: theme.walk },
+    attack: { frames: 5, frameDuration: 0.08, loop: false, palette: theme.attack },
+    knockback: { frames: 3, frameDuration: 0.09, loop: false, palette: theme.knockback },
+    death: { frames: 4, frameDuration: 0.1, loop: false, palette: theme.death }
+  };
 }
 
-/**
- * BattleField controls lane Y positions, bases, money growth, and victory state.
- */
-class BattleField {
-  constructor(width, height) {
-    this.width = width;
-    this.height = height;
-    this.lanes = [110, 180, 250];
-    this.playerBaseHp = 300;
-    this.enemyBaseHp = 300;
-    this.money = 100;
-    this.maxMoney = 300;
-    this.moneyGainPerSec = 12;
-    this.running = false;
-    this.result = 'idle';
-  }
+async function loadData() {
+  const [units, enemies, stages] = await Promise.all([
+    fetch('assets/data/units.json').then((r) => r.json()),
+    fetch('assets/data/enemies.json').then((r) => r.json()),
+    fetch('assets/data/stages.json').then((r) => r.json())
+  ]);
 
-  laneY(index) {
-    return this.lanes[index] || this.lanes[0];
-  }
-
-  updateEconomy(dt) {
-    if (!this.running) return;
-    this.money = Math.min(this.maxMoney, this.money + this.moneyGainPerSec * dt);
-  }
-
-  applyBaseDamage(entity) {
-    if (entity.team === 'player' && entity.x >= this.width - 40) {
-      this.enemyBaseHp -= 10;
-      entity.alive = false;
+  Object.values(units).forEach((u) => {
+    if (!u.animations) {
+      u.animations = buildDefaultAnimations({
+        walk: ['#b8f7d4', '#93eec1', '#7dddb0', '#9de8c5'],
+        attack: ['#f6d365', '#fda085', '#f6d365', '#ffd3a5', '#ffe7ba'],
+        knockback: ['#9ca3af', '#6b7280', '#9ca3af'],
+        death: ['#f87171', '#ef4444', '#7f1d1d', '#111827']
+      });
     }
+  });
 
-    if (entity.team === 'enemy' && entity.x <= 40) {
-      this.playerBaseHp -= 10;
-      entity.alive = false;
+  Object.values(enemies).forEach((u) => {
+    if (!u.animations) {
+      u.animations = buildDefaultAnimations({
+        walk: ['#f9a8d4', '#f472b6', '#ec4899', '#f472b6'],
+        attack: ['#fb7185', '#f43f5e', '#e11d48', '#fb7185', '#fda4af'],
+        knockback: ['#94a3b8', '#64748b', '#94a3b8'],
+        death: ['#7f1d1d', '#450a0a', '#1f2937', '#111827']
+      });
     }
+  });
+
+  return { units, enemies, stages };
+}
+
+function drawCastle(castle, camera, isAlly) {
+  const width = 90;
+  const height = 140;
+  const x = camera.worldToScreenX(castle.x - width / 2);
+  const y = 150;
+  ctx.fillStyle = isAlly ? '#2563eb' : '#dc2626';
+  ctx.fillRect(x, y, width, height);
+  ctx.fillStyle = 'white';
+  ctx.fillText(isAlly ? 'ALLY CASTLE' : 'ENEMY CASTLE', x - 10, y - 10);
+}
+
+function drawUnit(unit, camera) {
+  const x = camera.worldToScreenX(unit.x - unit.width / 2);
+  const y = unit.y - unit.height;
+
+  ctx.save();
+  if (unit.team === 'enemy') {
+    ctx.translate(x + unit.width, y);
+    ctx.scale(-1, 1);
+    ctx.fillStyle = unit.animation.currentColor();
+    ctx.fillRect(0, 0, unit.width, unit.height);
+  } else {
+    ctx.fillStyle = unit.animation.currentColor();
+    ctx.fillRect(x, y, unit.width, unit.height);
   }
+  ctx.restore();
 
-  evaluateResult() {
-    if (this.enemyBaseHp <= 0) {
-      this.running = false;
-      this.result = 'win';
-    } else if (this.playerBaseHp <= 0) {
-      this.running = false;
-      this.result = 'lose';
-    }
+  const hpRatio = Math.max(0, unit.hp / unit.maxHp);
+  ctx.fillStyle = '#111827';
+  ctx.fillRect(x, y - 12, unit.width, 7);
+  ctx.fillStyle = '#22c55e';
+  ctx.fillRect(x, y - 12, unit.width * hpRatio, 7);
+}
+
+function drawBackground(stage, camera) {
+  ctx.fillStyle = '#7dd3fc';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#22c55e';
+  ctx.fillRect(0, stage.groundY, canvas.width, canvas.height - stage.groundY);
+
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+  for (let x = 0; x < stage.width; x += 240) {
+    const screenX = camera.worldToScreenX(x);
+    ctx.beginPath();
+    ctx.moveTo(screenX, 0);
+    ctx.lineTo(screenX, canvas.height);
+    ctx.stroke();
   }
 }
 
 (async function bootstrap() {
-  const canvas = document.getElementById('gameCanvas');
-  const statusText = document.getElementById('statusText');
-  const moneyGauge = document.getElementById('moneyGauge');
-  const moneyValue = document.getElementById('moneyValue');
+  const { units, enemies, stages } = await loadData();
+  const stage = stages.defaultStage;
 
-  const renderer = new Renderer(canvas);
-  const field = new BattleField(canvas.width, canvas.height);
-  const loader = new ResourceLoader();
+  const manager = new StageManager({ stage, allies: units, enemies });
+  const camera = new Camera({ viewportWidth: canvas.width, stageWidth: stage.width });
 
-  // JSON-like unit definitions are loaded from local file data.
-  const unitDefs = await fetch('assets/data/units.json').then((r) => r.json());
+  let running = false;
+  let previous = performance.now();
 
-  const images = await loader.loadImages({
-    background: 'assets/images/background.svg',
-    ally: 'assets/images/ally_cat.svg',
-    enemy: 'assets/images/enemy_blob.svg',
-    effect: 'assets/images/hit_effect.svg'
+  startButton.addEventListener('click', () => {
+    location.reload();
   });
 
-  const allySprite = new Sprite(images.ally);
-  const enemySprite = new Sprite(images.enemy);
-
-  const allies = [];
-  const enemies = [];
-
-  let spawnTimer = 0;
-
-  const spawnAlly = () => {
-    const def = unitDefs.cat_basic;
-    if (!field.running || field.money < def.cost) return;
-    field.money -= def.cost;
-
-    const lane = Math.floor(Math.random() * field.lanes.length);
-    const ally = new Entity({ ...def, team: 'player', x: 80, lane, sprite: allySprite });
-    ally.y = field.laneY(lane);
-    allies.push(ally);
-  };
-
-  const spawnEnemy = () => {
-    const def = unitDefs.enemy_basic;
-    const lane = Math.floor(Math.random() * field.lanes.length);
-    const enemy = new Entity({ ...def, team: 'enemy', x: canvas.width - 80, lane, sprite: enemySprite });
-    enemy.y = field.laneY(lane);
-    enemies.push(enemy);
-  };
-
-  const uiInput = new Input({
-    onStart: () => {
-      allies.length = 0;
-      enemies.length = 0;
-      field.playerBaseHp = 300;
-      field.enemyBaseHp = 300;
-      field.money = 100;
-      field.running = true;
-      field.result = 'running';
-      statusText.className = 'status-text';
-      statusText.textContent = 'Battle started!';
-      uiInput.setStartEnabled(false);
-    },
-    onSpawn: spawnAlly
+  spawnButton.addEventListener('click', () => {
+    manager.spawnAlly('cat_basic');
   });
 
-  const loop = new GameLoop({
-    fps: 60,
-    update: (dt) => {
-      field.updateEconomy(dt);
-      moneyGauge.value = Math.round(field.money);
-      moneyValue.textContent = `${Math.round(field.money)} / ${field.maxMoney}`;
-      uiInput.setSpawnEnabled(field.running && field.money >= unitDefs.cat_basic.cost);
+  statusText.textContent = '← → / A D でカメラスクロール。Deployで左拠点から出撃。';
+  running = true;
 
-      if (!field.running) return;
+  function frame(now) {
+    const dt = Math.min(0.05, (now - previous) / 1000);
+    previous = now;
 
-      spawnTimer += dt;
-      if (spawnTimer >= 2.5) {
-        spawnTimer = 0;
-        spawnEnemy();
-      }
+    if (running) {
+      const inputX = (keyState.right ? 1 : 0) - (keyState.left ? 1 : 0);
+      camera.update(dt, inputX);
+      manager.update(dt);
 
-      const updateSide = (units, targets) => {
-        units.forEach((unit) => {
-          const target = Collision.findTarget(unit, targets);
-          unit.update(dt, target);
-          unit.sprite.update(dt);
-
-          if (target && Collision.inRange(unit, target)) {
-            unit.attack(target);
-          }
-
-          field.applyBaseDamage(unit);
-        });
-      };
-
-      updateSide(allies, enemies);
-      updateSide(enemies, allies);
-
-      // Remove defeated entities from arrays.
-      const aliveAllies = allies.filter((u) => u.alive);
-      const aliveEnemies = enemies.filter((u) => u.alive);
-      allies.length = 0;
-      enemies.length = 0;
-      allies.push(...aliveAllies);
-      enemies.push(...aliveEnemies);
-
-      field.evaluateResult();
-
-      if (field.result === 'win') {
-        statusText.className = 'status-text win';
-        statusText.textContent = 'Victory! Enemy base collapsed.';
-        uiInput.setStartEnabled(true);
-      } else if (field.result === 'lose') {
-        statusText.className = 'status-text lose';
-        statusText.textContent = 'Defeat... Your base was destroyed.';
-        uiInput.setStartEnabled(true);
-      }
-    },
-    draw: () => {
-      renderer.clear();
-      renderer.drawBackground(images.background);
-      const ctx = renderer.ctx;
-
-      // Draw lane guide lines for readability.
-      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-      field.lanes.forEach((laneY) => {
-        ctx.beginPath();
-        ctx.moveTo(0, laneY + 26);
-        ctx.lineTo(canvas.width, laneY + 26);
-        ctx.stroke();
-      });
-
-      // Draw bases at both edges.
-      ctx.fillStyle = '#4b5563';
-      ctx.fillRect(0, 80, 30, 220);
-      ctx.fillRect(canvas.width - 30, 80, 30, 220);
-
-      // Draw each entity sprite and small HP bars.
-      const drawUnit = (unit) => {
-        unit.sprite.draw(ctx, unit.x - 28, unit.y - 28, unit.width, unit.height, unit.team === 'enemy');
-        ctx.fillStyle = '#111';
-        ctx.fillRect(unit.x - 28, unit.y - 36, 56, 5);
-        ctx.fillStyle = '#22c55e';
-        ctx.fillRect(unit.x - 28, unit.y - 36, Math.max(0, (unit.hp / unit.maxHp) * 56), 5);
-      };
-
-      allies.forEach(drawUnit);
-      enemies.forEach(drawUnit);
-
-      // Draw base HP text.
-      ctx.fillStyle = '#fff';
+      drawBackground(stage, camera);
       ctx.font = '14px sans-serif';
-      ctx.fillText(`Base HP: ${Math.max(0, Math.round(field.playerBaseHp))}`, 12, 24);
-      ctx.fillText(`Enemy HP: ${Math.max(0, Math.round(field.enemyBaseHp))}`, canvas.width - 130, 24);
-    }
-  });
+      drawCastle(manager.allyCastle, camera, true);
+      drawCastle(manager.enemyCastle, camera, false);
+      manager.allyUnits.forEach((u) => drawUnit(u, camera));
+      manager.enemyUnits.forEach((u) => drawUnit(u, camera));
 
-  loop.start();
+      moneyGauge.max = manager.maxMoney;
+      moneyGauge.value = Math.floor(manager.money);
+      moneyValue.textContent = `${Math.floor(manager.money)} / ${manager.maxMoney}`;
+      allyCastleText.textContent = Math.max(0, Math.ceil(manager.allyCastle.hp));
+      enemyCastleText.textContent = Math.max(0, Math.ceil(manager.enemyCastle.hp));
+      stageTimeText.textContent = manager.elapsed.toFixed(1);
+      spawnButton.disabled = manager.money < units.cat_basic.cost || manager.finished;
+
+      if (manager.finished) {
+        statusText.textContent = manager.result === 'win' ? '勝利！敵城を破壊しました。' : '敗北…味方の城が崩壊。';
+        running = false;
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
 })();

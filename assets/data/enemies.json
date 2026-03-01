@@ -1,0 +1,47 @@
+{
+  "enemy_blob": {
+    "id": "enemy_blob",
+    "name": "Blob",
+    "hp": 130,
+    "attackPower": 18,
+    "attackToCastle": 14,
+    "range": 45,
+    "moveSpeed": 74,
+    "attackInterval": 1.4,
+    "attackWindup": 0.25,
+    "knockbackCount": 2,
+    "knockbackDistance": 50,
+    "knockbackDuration": 0.2,
+    "size": { "w": 58, "h": 58 }
+  },
+  "enemy_sniper": {
+    "id": "enemy_sniper",
+    "name": "Sniper Doge",
+    "hp": 105,
+    "attackPower": 40,
+    "attackToCastle": 26,
+    "range": 180,
+    "moveSpeed": 56,
+    "attackInterval": 2.1,
+    "attackWindup": 0.55,
+    "knockbackCount": 3,
+    "knockbackDistance": 68,
+    "knockbackDuration": 0.28,
+    "size": { "w": 66, "h": 66 }
+  },
+  "enemy_boss": {
+    "id": "enemy_boss",
+    "name": "Boss Hippo",
+    "hp": 620,
+    "attackPower": 60,
+    "attackToCastle": 45,
+    "range": 65,
+    "moveSpeed": 46,
+    "attackInterval": 2.2,
+    "attackWindup": 0.5,
+    "knockbackCount": 4,
+    "knockbackDistance": 72,
+    "knockbackDuration": 0.32,
+    "size": { "w": 88, "h": 88 }
+  }
+}
