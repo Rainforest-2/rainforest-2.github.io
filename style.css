@@ -1,0 +1,133 @@
+:root {
+  color-scheme: dark;
+  --ink: #f3f1ea;
+  --bg: #1a1a1a;
+  --panel: #232323;
+  --accent: #d7b570;
+  --disabled: #555;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at top, #2b2b2b, #111);
+}
+
+.game-shell {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 12px;
+}
+
+.hud,
+.unit-bar,
+.canvas-wrap {
+  border: 2px solid #000;
+  background: linear-gradient(180deg, #2a2a2a, #1f1f1f);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+}
+
+.hud {
+  padding: 8px 14px;
+}
+
+.hud-row {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr auto;
+  gap: 12px;
+}
+
+.money-panel progress {
+  width: 100%;
+}
+
+.canvas-wrap {
+  margin-top: 10px;
+  position: relative;
+  padding: 8px;
+}
+
+#gameCanvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #d8d0bf;
+  image-rendering: crisp-edges;
+  /* 墨絵風の線画寄りに見せる軽いフィルタ */
+  filter: contrast(1.12) saturate(0.8);
+}
+
+#statusText {
+  position: absolute;
+  left: 18px;
+  bottom: 14px;
+  margin: 0;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid #fff2;
+}
+
+.unit-bar {
+  margin-top: 10px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.unit-slot {
+  position: relative;
+  min-height: 82px;
+  border: 2px solid #000;
+  background: #3a3a3a;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.unit-slot.enabled {
+  background: linear-gradient(160deg, #6a5f48, #2f2b22);
+}
+
+.unit-slot.disabled {
+  background: #333;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.unit-slot .name {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.unit-slot .cost {
+  font-size: 11px;
+}
+
+.unit-slot .cooldown {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.tooltip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #0f0f0fcc;
+  border: 1px solid #fff3;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: 0.12s;
+}
+
+.tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+}

@@ -3,35 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Battle Cats Style TD Rebuild</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <title>にゃんこ風バトルエンジン</title>
+    <!-- ルートに置いたスタイルを読み込む（要件の構成に準拠） -->
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main class="layout">
+    <main class="game-shell">
       <header class="hud">
-        <h1>Battle Cats Style TD Rebuild</h1>
+        <h1>Battle Engine Rebuild (30FPS / Frame Logic)</h1>
         <div class="hud-row">
-          <div class="gauge-wrap" aria-label="money gauge">
-            <label for="moneyGauge">Money</label>
-            <progress id="moneyGauge" max="1200" value="120"></progress>
-            <span id="moneyValue">120 / 1200</span>
+          <div class="money-panel">
+            <p>所持金 <span id="moneyText">0 / 0</span></p>
+            <progress id="moneyBar" value="0" max="1"></progress>
           </div>
-          <div class="battle-metrics">
-            <span>味方城HP: <strong id="allyCastleHp">1800</strong></span>
-            <span>敵城HP: <strong id="enemyCastleHp">1800</strong></span>
-            <span>経過: <strong id="stageTime">0.0</strong>s</span>
+          <div class="base-panel">
+            <p>敵城HP: <strong id="enemyBaseHp">0</strong></p>
+            <p>味方城HP: <strong id="playerBaseHp">0</strong></p>
+            <p>財布Lv: <strong id="walletLevel">1</strong></p>
+            <p>経過F: <strong id="frameCounter">0</strong></p>
           </div>
-          <div class="control-wrap">
-            <button id="startButton" type="button">Restart Stage</button>
-            <button id="spawnButton" type="button">Deploy Cat (50)</button>
+          <div class="control-panel">
+            <button id="startButton" type="button">ステージ開始</button>
+            <button id="walletButton" type="button">財布レベルUP</button>
           </div>
         </div>
       </header>
 
-      <section class="battle-area">
-        <canvas id="gameCanvas" width="960" height="360" aria-label="game canvas"></canvas>
-        <p id="statusText" class="status-text">初期化中...</p>
+      <section class="canvas-wrap">
+        <!-- メイン描画。camera.applyTransform でワールド描画を統一 -->
+        <canvas id="gameCanvas" width="1280" height="720" aria-label="にゃんこ風バトル"></canvas>
+        <p id="statusText">準備完了</p>
       </section>
+
+      <section class="unit-bar" id="unitBar" aria-label="ユニットスロット"></section>
     </main>
 
     <script type="module" src="js/main.js"></script>

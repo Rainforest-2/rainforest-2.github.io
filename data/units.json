@@ -1,0 +1,50 @@
+{
+  "cat": {
+    "name": "ネコ",
+    "hp": 420,
+    "cost": 50,
+    "recharge": 72,
+    "range": 110,
+    "speed": 4,
+    "atk_power": 48,
+    "attack_state": { "pre": 8, "hit": 16, "total": 28 },
+    "kb_count": 3,
+    "attributes": { "red": 1.0, "floating": 1.0, "black": 1.0 }
+  },
+  "tank": {
+    "name": "タンクネコ",
+    "hp": 1300,
+    "cost": 150,
+    "recharge": 120,
+    "range": 95,
+    "speed": 2,
+    "atk_power": 26,
+    "attack_state": { "pre": 12, "hit": 20, "total": 38 },
+    "kb_count": 1,
+    "attributes": { "red": 1.0, "floating": 1.0, "black": 1.0 }
+  },
+  "axe": {
+    "name": "バトルネコ",
+    "hp": 560,
+    "cost": 240,
+    "recharge": 180,
+    "range": 120,
+    "speed": 5,
+    "atk_power": 150,
+    "attack_state": { "pre": 18, "hit": 28, "total": 52 },
+    "kb_count": 2,
+    "attributes": { "red": 1.0, "floating": 1.0, "black": 1.0 }
+  },
+  "gross": {
+    "name": "キモネコ",
+    "hp": 720,
+    "cost": 420,
+    "recharge": 260,
+    "range": 320,
+    "speed": 2,
+    "atk_power": 190,
+    "attack_state": { "pre": 30, "hit": 45, "total": 74 },
+    "kb_count": 3,
+    "attributes": { "red": 1.0, "floating": 1.0, "black": 1.0 }
+  }
+}
