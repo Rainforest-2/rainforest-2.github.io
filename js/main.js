@@ -1,106 +1,76 @@
-import { Loader } from './engine/loader.js';
-import { GameCore } from './engine/core.js';
+import { GameLoop } from './game/GameLoop.js';
+import { Camera } from './game/Camera.js';
+import { TouchInput } from './game/TouchInput.js';
+import { Renderer } from './game/Renderer.js';
+import { BattleSystem } from './game/BattleSystem.js';
+import { UIManager } from './game/UIManager.js';
 
-/**
- * main.js
- * UIイベントと GameCore を接続。
- */
 const canvas = document.getElementById('gameCanvas');
-const uiRefs = {
-  moneyText: document.getElementById('moneyText'),
-  moneyBar: document.getElementById('moneyBar'),
-  enemyBaseHp: document.getElementById('enemyBaseHp'),
-  playerBaseHp: document.getElementById('playerBaseHp'),
-  walletLevel: document.getElementById('walletLevel'),
-  frameCounter: document.getElementById('frameCounter'),
-  statusText: document.getElementById('statusText')
-};
+const uiBar = document.getElementById('uiBar');
 
-const unitBar = document.getElementById('unitBar');
-const tooltip = document.createElement('div');
-tooltip.className = 'tooltip';
-document.body.append(tooltip);
+const [units, enemies, stages] = await Promise.all([
+  fetch('./data/units.json').then((r) => r.json()),
+  fetch('./data/enemies.json').then((r) => r.json()),
+  fetch('./data/stages.json').then((r) => r.json())
+]);
 
-const data = await Loader.loadGameData();
-const game = new GameCore(canvas, uiRefs, data);
+const worldWidth = 4200;
+const battleHeight = () => window.innerHeight - uiBar.getBoundingClientRect().height;
 
-function createSlotCanvasOverlay(slot, ratio) {
-  const overlay = slot.querySelector('.cooldown');
-  const c = overlay.getContext('2d');
-  c.clearRect(0, 0, overlay.width, overlay.height);
-  if (ratio <= 0) return;
+const camera = new Camera(worldWidth, window.innerWidth);
+const renderer = new Renderer(canvas, camera, battleHeight);
+const battle = new BattleSystem({
+  units,
+  enemies,
+  stage: stages[0],
+  worldWidth,
+  battleHeight: battleHeight()
+});
 
-  c.fillStyle = 'rgba(0,0,0,0.5)';
-  c.beginPath();
-  c.moveTo(overlay.width / 2, overlay.height / 2);
-  c.arc(
-    overlay.width / 2,
-    overlay.height / 2,
-    overlay.width,
-    -Math.PI / 2,
-    -Math.PI / 2 + Math.PI * 2 * ratio
-  );
-  c.closePath();
-  c.fill();
+const ui = new UIManager(
+  {
+    moneyText: document.getElementById('moneyText'),
+    walletLevel: document.getElementById('walletLevel'),
+    walletBtn: document.getElementById('walletBtn'),
+    cannonBtn: document.getElementById('cannonBtn'),
+    cannonState: document.getElementById('cannonState'),
+    slotScroller: document.getElementById('slotScroller')
+  },
+  battle.unitDefs,
+  (key) => battle.spawnPlayer(key),
+  () => battle.levelUpWallet(),
+  () => battle.fireCannon()
+);
+
+new TouchInput(canvas, battleHeight, camera);
+
+const loop = new GameLoop(
+  () => {
+    camera.applyInertia();
+    battle.resizeBattleHeight(battleHeight());
+    camera.setViewWidth(window.innerWidth);
+    battle.step();
+    ui.render(battle.getUIState());
+  },
+  () => {
+    renderer.render({
+      units: battle.units,
+      effects: battle.effects,
+      groundY: battle.groundY,
+      enemyBase: battle.enemyBase,
+      playerBase: battle.playerBase,
+      cannonFxFrames: battle.cannonFxFrames
+    });
+  },
+  30
+);
+
+function onResize() {
+  renderer.resize();
+  camera.setViewWidth(window.innerWidth);
 }
 
-function renderUnitBar() {
-  unitBar.innerHTML = '';
-
-  const keys = Object.keys(data.units).slice(0, 8);
-  keys.forEach((key) => {
-    const def = data.units[key];
-    const slot = document.createElement('button');
-    slot.className = 'unit-slot';
-    slot.innerHTML = `<span class="name">${def.name}</span><span class="cost">${def.cost}円</span>`;
-
-    const overlay = document.createElement('canvas');
-    overlay.className = 'cooldown';
-    overlay.width = 160;
-    overlay.height = 82;
-    slot.append(overlay);
-
-    slot.addEventListener('click', () => game.spawnPlayer(key));
-
-    slot.addEventListener('mouseenter', () => {
-      tooltip.classList.add('show');
-      tooltip.textContent = `${def.name} | 射程:${def.range} | 速度:${def.speed} | 再生産:${def.recharge}F`;
-    });
-    slot.addEventListener('mousemove', (e) => {
-      tooltip.style.left = `${e.clientX + 12}px`;
-      tooltip.style.top = `${e.clientY + 12}px`;
-    });
-    slot.addEventListener('mouseleave', () => {
-      tooltip.classList.remove('show');
-    });
-
-    unitBar.append(slot);
-  });
-
-  function updateSlots() {
-    const slots = [...unitBar.querySelectorAll('.unit-slot')];
-    slots.forEach((slot, i) => {
-      const key = keys[i];
-      const def = data.units[key];
-      const cd = game.rechargeMap.get(key) ?? 0;
-      const ratio = def.recharge ? cd / def.recharge : 0;
-
-      const enable = game.canSpawn(key);
-      slot.classList.toggle('enabled', enable);
-      slot.classList.toggle('disabled', !enable);
-      createSlotCanvasOverlay(slot, ratio);
-    });
-
-    requestAnimationFrame(updateSlots);
-  }
-
-  requestAnimationFrame(updateSlots);
-}
-
-renderUnitBar();
-
-document.getElementById('startButton').addEventListener('click', () => game.setupStage(0));
-document.getElementById('walletButton').addEventListener('click', () => game.levelUpWallet());
-
-game.setupStage(0);
-game.run();
+window.addEventListener('resize', onResize);
+window.addEventListener('orientationchange', onResize);
+onResize();
+loop.start();
